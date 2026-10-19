@@ -3164,6 +3164,77 @@
               ]
             }
           }
+        },
+        {
+          "name": "8.9 Update Wallet (Success)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"El correo se actualiza\", function () {",
+                  "    pm.expect(pm.response.json().email).to.eql(\"yanki.updated@mail.com\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "url": {
+              "raw": "{{wallet_url}}/wallets/{{walletId}}",
+              "host": [
+                "{{wallet_url}}"
+              ],
+              "path": [
+                "wallets",
+                "{{walletId}}"
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"documentNumber\": \"70123456\",\n  \"cellphone\": \"{{walletCellphone}}\",\n  \"imei\": \"IMEI-123456789\",\n  \"email\": \"yanki.updated@mail.com\"\n}"
+            }
+          }
+        },
+        {
+          "name": "8.10 Delete Wallet (Success)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 204\", function () {",
+                  "    pm.response.to.have.status(204);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{wallet_url}}/wallets/{{walletId}}",
+              "host": [
+                "{{wallet_url}}"
+              ],
+              "path": [
+                "wallets",
+                "{{walletId}}"
+              ]
+            }
+          }
         }
       ]
     }

@@ -18,7 +18,7 @@ escenarios de prueba que se usan para verificar funcionalmente la solución.
 | `Bank-System-Microservices.postman_collection.json` | Versión resumida de la colección (mismo contenido, formato ligero). |
 
 **Colección:** `Bank System - Complete Test Scenarios (Partes I, II y III)`
-**Total:** 84 peticiones en 9 carpetas.
+**Total:** 86 peticiones en 9 carpetas.
 
 ---
 
@@ -34,8 +34,8 @@ escenarios de prueba que se usan para verificar funcionalmente la solución.
 | `5. Credit Payments, Card Consumption & Balances` | 14 | Pagos de crédito, consumos con tarjeta y saldos |
 | `6. Debit Cards & Reports` | 11 | Tarjetas de débito y **reportes** |
 | `7. Yanki Wallet (Kafka)` | 9 | Monedero Yanki: registro, pagos entre monederos, carga/retiro |
-| `8. Update & Delete (CRUD restante)` | 8 | Endpoints `PUT` y `DELETE` de todas las entidades |
-| **Total** | **84** | |
+| `8. Update & Delete (CRUD restante)` | 10 | Endpoints `PUT` y `DELETE` de todas las entidades, incluido el monedero Yanki |
+| **Total** | **86** | |
 
 Cada carpeta incluye tanto **escenarios de éxito** como **escenarios de error**, para validar las
 reglas de negocio (cuentas de ahorro con límite de movimientos, cuenta corriente con comisión,
