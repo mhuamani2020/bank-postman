@@ -1,0 +1,3171 @@
+{
+  "info": {
+    "name": "Bank System - Complete Test Scenarios (Partes I, II y III)",
+    "description": "Colección completa con los casos de éxito y de validación de reglas de negocio. Incluye autenticación JWT (Parte III): ejecutar primero '0. Auth Service' para obtener el token, que se propaga automáticamente (collection auth = Bearer {{token}}) en el resto de peticiones.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "customer_url",
+      "value": "http://localhost:8081",
+      "type": "string"
+    },
+    {
+      "key": "account_url",
+      "value": "http://localhost:8082",
+      "type": "string"
+    },
+    {
+      "key": "credit_url",
+      "value": "http://localhost:8083",
+      "type": "string"
+    },
+    {
+      "key": "personalCustomerId",
+      "value": "cust-pers-01",
+      "type": "string"
+    },
+    {
+      "key": "businessCustomerId",
+      "value": "cust-biz-01",
+      "type": "string"
+    },
+    {
+      "key": "personalVipCustomerId",
+      "value": "cust-vip-01",
+      "type": "string"
+    },
+    {
+      "key": "savingsAccountId",
+      "value": "acc-savings-01",
+      "type": "string"
+    },
+    {
+      "key": "targetAccountId",
+      "value": "acc-savings-02",
+      "type": "string"
+    },
+    {
+      "key": "creditCardId",
+      "value": "cred-card-01",
+      "type": "string"
+    },
+    {
+      "key": "personalCreditId",
+      "value": "cred-pers-01",
+      "type": "string"
+    },
+    {
+      "key": "transactionId",
+      "value": "tx-001",
+      "type": "string"
+    },
+    {
+      "key": "auth_url",
+      "value": "http://localhost:8084",
+      "type": "string"
+    },
+    {
+      "key": "wallet_url",
+      "value": "http://localhost:8085",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "debitCardId",
+      "value": "card-001",
+      "type": "string"
+    },
+    {
+      "key": "walletId",
+      "value": "wallet-001",
+      "type": "string"
+    },
+    {
+      "key": "walletCellphone",
+      "value": "999888777",
+      "type": "string"
+    },
+    {
+      "key": "targetWalletCellphone",
+      "value": "999111222",
+      "type": "string"
+    },
+    {
+      "key": "creditMovementId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "0. Auth Service",
+      "item": [
+        {
+          "name": "0.1 Login (Get JWT Token)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Login OK y token guardado\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    var json = pm.response.json();",
+                  "    pm.collectionVariables.set(\"token\", json.accessToken);",
+                  "    pm.expect(json.accessToken).to.be.a(\"string\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "description": "Obtiene el JWT y lo guarda en la variable de colección {{token}}. Ejecutar ANTES que el resto de carpetas.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"admin123\"\n}"
+            },
+            "url": {
+              "raw": "{{auth_url}}/auth/login",
+              "host": [
+                "{{auth_url}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          }
+        },
+        {
+          "name": "0.2 Register User (Success)",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"operador\",\n  \"password\": \"operador123\"\n}"
+            },
+            "url": {
+              "raw": "{{auth_url}}/auth/register",
+              "host": [
+                "{{auth_url}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "1. Customer Service",
+      "item": [
+        {
+          "name": "1.1 Create Personal Customer (Success)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Juan Perez\",\n  \"documentNumber\": \"10203040\",\n  \"customerType\": \"PERSONAL\"\n}"
+            },
+            "url": {
+              "raw": "{{customer_url}}/customers",
+              "host": [
+                "{{customer_url}}"
+              ],
+              "path": [
+                "customers"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.collectionVariables.set(\"personalCustomerId\", json.id);",
+                  "pm.test(\"Status code es 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "1.2 Create Business Customer (Success)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Inversiones Globales S.A.C.\",\n  \"documentNumber\": \"20123456789\",\n  \"customerType\": \"BUSINESS\"\n}"
+            },
+            "url": {
+              "raw": "{{customer_url}}/customers",
+              "host": [
+                "{{customer_url}}"
+              ],
+              "path": [
+                "customers"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.collectionVariables.set(\"businessCustomerId\", json.id);",
+                  "pm.test(\"Status code es 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "1.3 Create Personal VIP Customer (Success)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Maria Delgado VIP\",\n  \"documentNumber\": \"40506070\",\n  \"customerType\": \"PERSONAL\",\n  \"profile\": \"VIP\"\n}"
+            },
+            "url": {
+              "raw": "{{customer_url}}/customers",
+              "host": [
+                "{{customer_url}}"
+              ],
+              "path": [
+                "customers"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.collectionVariables.set(\"personalVipCustomerId\", json.id);",
+                  "pm.test(\"Status code es 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "1.4 Get All Customers",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{customer_url}}/customers",
+              "host": [
+                "{{customer_url}}"
+              ],
+              "path": [
+                "customers"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "1.5 Get Customer By ID (Success)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{customer_url}}/customers/{{personalCustomerId}}",
+              "host": [
+                "{{customer_url}}"
+              ],
+              "path": [
+                "customers",
+                "{{personalCustomerId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "1.6 Get Customer By ID (Error 404 - Not Found)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{customer_url}}/customers/inexistente-999",
+              "host": [
+                "{{customer_url}}"
+              ],
+              "path": [
+                "customers",
+                "inexistente-999"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 404\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "2. Credit Service",
+      "item": [
+        {
+          "name": "2.1 Create Personal Credit (Success)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerId\": \"{{personalCustomerId}}\",\n  \"creditType\": \"PERSONAL_CREDIT\",\n  \"amount\": 5000.0,\n  \"balance\": 5000.0\n}"
+            },
+            "url": {
+              "raw": "{{credit_url}}/credits",
+              "host": [
+                "{{credit_url}}"
+              ],
+              "path": [
+                "credits"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.collectionVariables.set(\"personalCreditId\", json.id);",
+                  "pm.test(\"Status code es 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "2.2 Create Personal Credit (Error 400 - Duplicate Personal Credit)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerId\": \"{{personalCustomerId}}\",\n  \"creditType\": \"PERSONAL_CREDIT\",\n  \"amount\": 3000.0,\n  \"balance\": 3000.0\n}"
+            },
+            "url": {
+              "raw": "{{credit_url}}/credits",
+              "host": [
+                "{{credit_url}}"
+              ],
+              "path": [
+                "credits"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "2.3 Create Business Credit by Personal (Error 400 - Forbidden)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerId\": \"{{personalCustomerId}}\",\n  \"creditType\": \"BUSINESS_CREDIT\",\n  \"amount\": 20000.0,\n  \"balance\": 20000.0\n}"
+            },
+            "url": {
+              "raw": "{{credit_url}}/credits",
+              "host": [
+                "{{credit_url}}"
+              ],
+              "path": [
+                "credits"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "2.4 Create Business Credit (Success 1)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerId\": \"{{businessCustomerId}}\",\n  \"creditType\": \"BUSINESS_CREDIT\",\n  \"amount\": 50000.0,\n  \"balance\": 50000.0\n}"
+            },
+            "url": {
+              "raw": "{{credit_url}}/credits",
+              "host": [
+                "{{credit_url}}"
+              ],
+              "path": [
+                "credits"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "2.5 Create Multiple Business Credit (Success 2)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerId\": \"{{businessCustomerId}}\",\n  \"creditType\": \"BUSINESS_CREDIT\",\n  \"amount\": 100000.0,\n  \"balance\": 100000.0\n}"
+            },
+            "url": {
+              "raw": "{{credit_url}}/credits",
+              "host": [
+                "{{credit_url}}"
+              ],
+              "path": [
+                "credits"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "2.6 Create Personal Credit by Business (Error 400 - Forbidden)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerId\": \"{{businessCustomerId}}\",\n  \"creditType\": \"PERSONAL_CREDIT\",\n  \"amount\": 8000.0,\n  \"balance\": 8000.0\n}"
+            },
+            "url": {
+              "raw": "{{credit_url}}/credits",
+              "host": [
+                "{{credit_url}}"
+              ],
+              "path": [
+                "credits"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "2.7 Create Credit Card for VIP Customer (Success)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerId\": \"{{personalVipCustomerId}}\",\n  \"creditType\": \"CREDIT_CARD\",\n  \"amount\": 10000.0,\n  \"balance\": 10000.0\n}"
+            },
+            "url": {
+              "raw": "{{credit_url}}/credits",
+              "host": [
+                "{{credit_url}}"
+              ],
+              "path": [
+                "credits"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.collectionVariables.set(\"creditCardId\", json.id);",
+                  "pm.test(\"Status code es 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "2.8 Validate Has Credit Card (Internal Check)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{credit_url}}/credits/customer/{{personalVipCustomerId}}/has-credit-card",
+              "host": [
+                "{{credit_url}}"
+              ],
+              "path": [
+                "credits",
+                "customer",
+                "{{personalVipCustomerId}}",
+                "has-credit-card"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "2.9 Get All Credits (FindAll)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{credit_url}}/credits",
+              "host": [
+                "{{credit_url}}"
+              ],
+              "path": [
+                "credits"
+              ]
+            },
+            "description": "CRUD: FindAll de creditos."
+          }
+        },
+        {
+          "name": "2.10 Get Credit By ID (FindById)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{credit_url}}/credits/{{personalCreditId}}",
+              "host": [
+                "{{credit_url}}"
+              ],
+              "path": [
+                "credits",
+                "{{personalCreditId}}"
+              ]
+            },
+            "description": "CRUD: FindById de credito."
+          }
+        },
+        {
+          "name": "2.11 Validate Has Overdue Debt (Internal Check)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{credit_url}}/credits/customer/{{personalVipCustomerId}}/has-overdue-debt",
+              "host": [
+                "{{credit_url}}"
+              ],
+              "path": [
+                "credits",
+                "customer",
+                "{{personalVipCustomerId}}",
+                "has-overdue-debt"
+              ]
+            },
+            "description": "Parte III: un cliente con deuda vencida no puede adquirir nuevos productos."
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Bank Account Service",
+      "item": [
+        {
+          "name": "3.1 Create Savings Account for Personal (Success)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerId\": \"{{personalCustomerId}}\",\n  \"accountType\": \"SAVINGS\",\n  \"balance\": 1500.0,\n  \"maintenanceFee\": 0.0,\n  \"maxMovements\": 10\n}"
+            },
+            "url": {
+              "raw": "{{account_url}}/bank-accounts",
+              "host": [
+                "{{account_url}}"
+              ],
+              "path": [
+                "bank-accounts"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.collectionVariables.set(\"savingsAccountId\", json.id);",
+                  "pm.test(\"Status code es 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "3.2 Create Duplicate Savings for Personal (Error 400 - Only 1 Allowed)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerId\": \"{{personalCustomerId}}\",\n  \"accountType\": \"SAVINGS\",\n  \"balance\": 500.0,\n  \"maintenanceFee\": 0.0,\n  \"maxMovements\": 10\n}"
+            },
+            "url": {
+              "raw": "{{account_url}}/bank-accounts",
+              "host": [
+                "{{account_url}}"
+              ],
+              "path": [
+                "bank-accounts"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "3.3 Create Savings Account for Business (Error 400 - Forbidden)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerId\": \"{{businessCustomerId}}\",\n  \"accountType\": \"SAVINGS\",\n  \"balance\": 2000.0,\n  \"maintenanceFee\": 0.0,\n  \"maxMovements\": 10\n}"
+            },
+            "url": {
+              "raw": "{{account_url}}/bank-accounts",
+              "host": [
+                "{{account_url}}"
+              ],
+              "path": [
+                "bank-accounts"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "3.4 Create Fixed Term for Business (Error 400 - Forbidden)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerId\": \"{{businessCustomerId}}\",\n  \"accountType\": \"FIXED_TERM\",\n  \"balance\": 5000.0,\n  \"maintenanceFee\": 0.0,\n  \"maxMovements\": 1\n}"
+            },
+            "url": {
+              "raw": "{{account_url}}/bank-accounts",
+              "host": [
+                "{{account_url}}"
+              ],
+              "path": [
+                "bank-accounts"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "3.5 Create Multiple Current Accounts for Business (Success 1)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerId\": \"{{businessCustomerId}}\",\n  \"accountType\": \"CURRENT\",\n  \"balance\": 8000.0,\n  \"maintenanceFee\": 30.0,\n  \"maxMovements\": 50,\n  \"holders\": [\"Inversiones Globales S.A.C.\"],\n  \"signatories\": [\"Maria Delgado\"]\n}"
+            },
+            "url": {
+              "raw": "{{account_url}}/bank-accounts",
+              "host": [
+                "{{account_url}}"
+              ],
+              "path": [
+                "bank-accounts"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "3.6 Create Multiple Current Accounts for Business (Success 2)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerId\": \"{{businessCustomerId}}\",\n  \"accountType\": \"CURRENT\",\n  \"balance\": 12000.0,\n  \"maintenanceFee\": 30.0,\n  \"maxMovements\": 50,\n  \"holders\": [\"Inversiones Globales S.A.C.\", \"Comercial Norte E.I.R.L.\"],\n  \"signatories\": []\n}"
+            },
+            "url": {
+              "raw": "{{account_url}}/bank-accounts",
+              "host": [
+                "{{account_url}}"
+              ],
+              "path": [
+                "bank-accounts"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.collectionVariables.set(\"targetAccountId\", json.id);",
+                  "pm.test(\"Status code es 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "3.7 Create VIP Account WITHOUT Credit Card (Error 400 - Missing Card)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerId\": \"{{personalCustomerId}}\",\n  \"accountType\": \"VIP\",\n  \"balance\": 1000.0,\n  \"maintenanceFee\": 0.0,\n  \"maxMovements\": 20\n}"
+            },
+            "url": {
+              "raw": "{{account_url}}/bank-accounts",
+              "host": [
+                "{{account_url}}"
+              ],
+              "path": [
+                "bank-accounts"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "3.8 Create VIP Account WITH Credit Card (Success)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerId\": \"{{personalVipCustomerId}}\",\n  \"accountType\": \"VIP\",\n  \"balance\": 5000.0,\n  \"maintenanceFee\": 0.0,\n  \"maxMovements\": 25\n}"
+            },
+            "url": {
+              "raw": "{{account_url}}/bank-accounts",
+              "host": [
+                "{{account_url}}"
+              ],
+              "path": [
+                "bank-accounts"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "3.9 Create Account with Inexistent Customer (Error 400 - Not Found)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerId\": \"id-fantasma-999\",\n  \"accountType\": \"SAVINGS\",\n  \"balance\": 100.0,\n  \"maintenanceFee\": 0.0,\n  \"maxMovements\": 10\n}"
+            },
+            "url": {
+              "raw": "{{account_url}}/bank-accounts",
+              "host": [
+                "{{account_url}}"
+              ],
+              "path": [
+                "bank-accounts"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "3.10 Create Fixed Term Account for Personal (Success)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "description": "Plazo fijo: libre de comision y con un unico movimiento mensual, en el dia indicado por fixedTermWithdrawalDay.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerId\": \"{{personalCustomerId}}\",\n  \"accountType\": \"FIXED_TERM\",\n  \"balance\": 2500.0,\n  \"maintenanceFee\": 0.0,\n  \"fixedTermWithdrawalDay\": 15\n}"
+            },
+            "url": {
+              "raw": "{{account_url}}/bank-accounts",
+              "host": [
+                "{{account_url}}"
+              ],
+              "path": [
+                "bank-accounts"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "3.11 Get Account Available Balance (Success)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "description": "Consulta del saldo disponible de una cuenta bancaria (Parte I).",
+            "url": {
+              "raw": "{{account_url}}/bank-accounts/{{savingsAccountId}}/balance",
+              "host": [
+                "{{account_url}}"
+              ],
+              "path": [
+                "bank-accounts",
+                "{{savingsAccountId}}",
+                "balance"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "3.12 Get Account Available Balance (Error 404 - Not Found)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{account_url}}/bank-accounts/acc-inexistente-999/balance",
+              "host": [
+                "{{account_url}}"
+              ],
+              "path": [
+                "bank-accounts",
+                "acc-inexistente-999",
+                "balance"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 404\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "3.13 Get All Bank Accounts (FindAll)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{account_url}}/bank-accounts",
+              "host": [
+                "{{account_url}}"
+              ],
+              "path": [
+                "bank-accounts"
+              ]
+            },
+            "description": "CRUD: FindAll de cuentas."
+          }
+        },
+        {
+          "name": "3.14 Get Bank Account By ID (FindById)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{account_url}}/bank-accounts/{{savingsAccountId}}",
+              "host": [
+                "{{account_url}}"
+              ],
+              "path": [
+                "bank-accounts",
+                "{{savingsAccountId}}"
+              ]
+            },
+            "description": "CRUD: FindById de cuenta."
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Transactions & Transfers",
+      "item": [
+        {
+          "name": "4.1 Deposit Transaction (Success)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"transactionType\": \"DEPOSIT\",\n  \"amount\": 250.0\n}"
+            },
+            "url": {
+              "raw": "{{account_url}}/bank-accounts/{{savingsAccountId}}/transactions",
+              "host": [
+                "{{account_url}}"
+              ],
+              "path": [
+                "bank-accounts",
+                "{{savingsAccountId}}",
+                "transactions"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.collectionVariables.set(\"transactionId\", json.id);",
+                  "pm.test(\"Status code es 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "4.2 Withdrawal Transaction (Success)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"transactionType\": \"WITHDRAWAL\",\n  \"amount\": 100.0\n}"
+            },
+            "url": {
+              "raw": "{{account_url}}/bank-accounts/{{savingsAccountId}}/transactions",
+              "host": [
+                "{{account_url}}"
+              ],
+              "path": [
+                "bank-accounts",
+                "{{savingsAccountId}}",
+                "transactions"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "4.3 Withdrawal Exceeding Balance (Error 400 - Insufficient Balance)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"transactionType\": \"WITHDRAWAL\",\n  \"amount\": 999999.0\n}"
+            },
+            "url": {
+              "raw": "{{account_url}}/bank-accounts/{{savingsAccountId}}/transactions",
+              "host": [
+                "{{account_url}}"
+              ],
+              "path": [
+                "bank-accounts",
+                "{{savingsAccountId}}",
+                "transactions"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "4.4 Transfer Between Accounts (Success)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sourceAccountId\": \"{{savingsAccountId}}\",\n  \"targetAccountId\": \"{{targetAccountId}}\",\n  \"amount\": 150.0\n}"
+            },
+            "url": {
+              "raw": "{{account_url}}/bank-accounts/transfers",
+              "host": [
+                "{{account_url}}"
+              ],
+              "path": [
+                "bank-accounts",
+                "transfers"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "4.5 Get All Account Transactions",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{account_url}}/bank-accounts/{{savingsAccountId}}/transactions",
+              "host": [
+                "{{account_url}}"
+              ],
+              "path": [
+                "bank-accounts",
+                "{{savingsAccountId}}",
+                "transactions"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "4.6 Get All Transactions (FindAll global)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{account_url}}/bank-accounts/transactions",
+              "host": [
+                "{{account_url}}"
+              ],
+              "path": [
+                "bank-accounts",
+                "transactions"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "4.7 Get Transaction By ID (FindById)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "description": "Usa la variable transactionId: copia el id devuelto por 4.6.",
+            "url": {
+              "raw": "{{account_url}}/bank-accounts/transactions/{{transactionId}}",
+              "host": [
+                "{{account_url}}"
+              ],
+              "path": [
+                "bank-accounts",
+                "transactions",
+                "{{transactionId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "4.8 Update Transaction (FindAndModify)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "description": "Corrige importe o tipo de un movimiento existente.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"transactionType\": \"WITHDRAWAL\",\n  \"amount\": 150.0\n}"
+            },
+            "url": {
+              "raw": "{{account_url}}/bank-accounts/transactions/{{transactionId}}",
+              "host": [
+                "{{account_url}}"
+              ],
+              "path": [
+                "bank-accounts",
+                "transactions",
+                "{{transactionId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "4.9 Delete Transaction",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "description": "Debe responder 204 No Content.",
+            "url": {
+              "raw": "{{account_url}}/bank-accounts/transactions/{{transactionId}}",
+              "host": [
+                "{{account_url}}"
+              ],
+              "path": [
+                "bank-accounts",
+                "transactions",
+                "{{transactionId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 204\", function () {",
+                  "    pm.response.to.have.status(204);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "5. Credit Payments, Card Consumption & Balances",
+      "item": [
+        {
+          "name": "5.1 Payment on Credit Card (Success)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "description": "El pago incrementa el saldo disponible sin superar el limite contratado.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 500.0\n}"
+            },
+            "url": {
+              "raw": "{{credit_url}}/credits/{{creditCardId}}/payments",
+              "host": [
+                "{{credit_url}}"
+              ],
+              "path": [
+                "credits",
+                "{{creditCardId}}",
+                "payments"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "5.2 Payment with Amount 0 (Error 400 - Invalid Amount)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 0\n}"
+            },
+            "url": {
+              "raw": "{{credit_url}}/credits/{{creditCardId}}/payments",
+              "host": [
+                "{{credit_url}}"
+              ],
+              "path": [
+                "credits",
+                "{{creditCardId}}",
+                "payments"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "5.3 Payment on Personal Credit (Success)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 1000.0\n}"
+            },
+            "url": {
+              "raw": "{{credit_url}}/credits/{{personalCreditId}}/payments",
+              "host": [
+                "{{credit_url}}"
+              ],
+              "path": [
+                "credits",
+                "{{personalCreditId}}",
+                "payments"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "5.4 Consumption on Credit Card (Success)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "description": "El consumo reduce el saldo disponible y debe caber dentro del limite de la tarjeta.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 1500.0\n}"
+            },
+            "url": {
+              "raw": "{{credit_url}}/credits/{{creditCardId}}/consumptions",
+              "host": [
+                "{{credit_url}}"
+              ],
+              "path": [
+                "credits",
+                "{{creditCardId}}",
+                "consumptions"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "5.5 Consumption Exceeding Credit Limit (Error 400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "description": "El importe no puede superar el saldo disponible de la tarjeta.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 999999\n}"
+            },
+            "url": {
+              "raw": "{{credit_url}}/credits/{{creditCardId}}/consumptions",
+              "host": [
+                "{{credit_url}}"
+              ],
+              "path": [
+                "credits",
+                "{{creditCardId}}",
+                "consumptions"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "5.6 Consumption on Personal Credit (Error 400 - Not a Card)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "description": "Solo CREDIT_CARD admiten consumos.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 100.0\n}"
+            },
+            "url": {
+              "raw": "{{credit_url}}/credits/{{personalCreditId}}/consumptions",
+              "host": [
+                "{{credit_url}}"
+              ],
+              "path": [
+                "credits",
+                "{{personalCreditId}}",
+                "consumptions"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "5.7 Get Available Balance of Credit Card",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{credit_url}}/credits/{{creditCardId}}/available-balance",
+              "host": [
+                "{{credit_url}}"
+              ],
+              "path": [
+                "credits",
+                "{{creditCardId}}",
+                "available-balance"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "5.8 Get Movements of Credit Card",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "description": "Historial de consumos y pagos del producto de credito.",
+            "url": {
+              "raw": "{{credit_url}}/credits/{{creditCardId}}/movements",
+              "host": [
+                "{{credit_url}}"
+              ],
+              "path": [
+                "credits",
+                "{{creditCardId}}",
+                "movements"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "5.9 Get Available Balance (Error 404 - Not Found)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{credit_url}}/credits/cred-inexistente-999/available-balance",
+              "host": [
+                "{{credit_url}}"
+              ],
+              "path": [
+                "credits",
+                "cred-inexistente-999",
+                "available-balance"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 404\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "5.10 Get All Credit Movements (FindAll)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{credit_url}}/credits/movements",
+              "host": [
+                "{{credit_url}}"
+              ],
+              "path": [
+                "credits",
+                "movements"
+              ]
+            },
+            "description": "CRUD: FindAll de movimientos de credito."
+          }
+        },
+        {
+          "name": "5.11 Create Credit Movement (Success)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "var json = pm.response.json();",
+                  "pm.collectionVariables.set(\"creditMovementId\", json.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{credit_url}}/credits/movements",
+              "host": [
+                "{{credit_url}}"
+              ],
+              "path": [
+                "credits",
+                "movements"
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"creditId\": \"{{creditCardId}}\",\n  \"movementType\": \"CONSUMPTION\",\n  \"amount\": 50,\n  \"balanceAfter\": 0\n}"
+            }
+          }
+        },
+        {
+          "name": "5.12 Get Credit Movement By ID (FindById)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{credit_url}}/credits/movements/{{creditMovementId}}",
+              "host": [
+                "{{credit_url}}"
+              ],
+              "path": [
+                "credits",
+                "movements",
+                "{{creditMovementId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "5.13 Update Credit Movement (Success)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "url": {
+              "raw": "{{credit_url}}/credits/movements/{{creditMovementId}}",
+              "host": [
+                "{{credit_url}}"
+              ],
+              "path": [
+                "credits",
+                "movements",
+                "{{creditMovementId}}"
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"creditId\": \"{{creditCardId}}\",\n  \"movementType\": \"CONSUMPTION\",\n  \"amount\": 75,\n  \"balanceAfter\": 0\n}"
+            }
+          }
+        },
+        {
+          "name": "5.14 Delete Credit Movement (Success)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 204\", function () {",
+                  "    pm.response.to.have.status(204);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{credit_url}}/credits/movements/{{creditMovementId}}",
+              "host": [
+                "{{credit_url}}"
+              ],
+              "path": [
+                "credits",
+                "movements",
+                "{{creditMovementId}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Debit Cards & Reports",
+      "item": [
+        {
+          "name": "6.1 Create Debit Card (Success)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"accountId\": \"{{savingsAccountId}}\",\n  \"status\": \"ACTIVE\"\n}"
+            },
+            "url": {
+              "raw": "{{account_url}}/debit-cards",
+              "host": [
+                "{{account_url}}"
+              ],
+              "path": [
+                "debit-cards"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.collectionVariables.set(\"debitCardId\", json.id);",
+                  "pm.test(\"Status code es 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "6.2 Create Debit Card for Inexistent Account (Error 400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"accountId\": \"acc-inexistente-999\",\n  \"status\": \"ACTIVE\"\n}"
+            },
+            "url": {
+              "raw": "{{account_url}}/debit-cards",
+              "host": [
+                "{{account_url}}"
+              ],
+              "path": [
+                "debit-cards"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "6.3 Get All Debit Cards",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{account_url}}/debit-cards",
+              "host": [
+                "{{account_url}}"
+              ],
+              "path": [
+                "debit-cards"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "6.4 Get Debit Card By ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{account_url}}/debit-cards/{{debitCardId}}",
+              "host": [
+                "{{account_url}}"
+              ],
+              "path": [
+                "debit-cards",
+                "{{debitCardId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "6.5 Get Debit Cards By Customer",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{account_url}}/debit-cards/customer/{{personalCustomerId}}",
+              "host": [
+                "{{account_url}}"
+              ],
+              "path": [
+                "debit-cards",
+                "customer",
+                "{{personalCustomerId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "6.6 Pay with Debit Card (Success)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "description": "Debita la cuenta principal asociada a la tarjeta de débito.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 100.0,\n  \"description\": \"Compra en comercio\"\n}"
+            },
+            "url": {
+              "raw": "{{account_url}}/debit-cards/{{debitCardId}}/payments",
+              "host": [
+                "{{account_url}}"
+              ],
+              "path": [
+                "debit-cards",
+                "{{debitCardId}}",
+                "payments"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "6.7 Get Debit Card Movements",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{account_url}}/debit-cards/{{debitCardId}}/movements",
+              "host": [
+                "{{account_url}}"
+              ],
+              "path": [
+                "debit-cards",
+                "{{debitCardId}}",
+                "movements"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "6.8 Report: Account Products Summary (by date range)",
+          "request": {
+            "method": "GET",
+            "description": "Reporte general por producto en un intervalo de fechas (Parte II).",
+            "url": {
+              "raw": "{{account_url}}/reports/bank-accounts/products-summary?from=2026-01-01&to=2026-12-31",
+              "host": [
+                "{{account_url}}"
+              ],
+              "path": [
+                "reports",
+                "bank-accounts",
+                "products-summary"
+              ],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "2026-01-01"
+                },
+                {
+                  "key": "to",
+                  "value": "2026-12-31"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "6.9 Report: Debit Card Last Movements",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{account_url}}/reports/debit-card/{{debitCardId}}/last-movements",
+              "host": [
+                "{{account_url}}"
+              ],
+              "path": [
+                "reports",
+                "debit-card",
+                "{{debitCardId}}",
+                "last-movements"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "6.10 Report: Credit Products Summary (by date range)",
+          "request": {
+            "method": "GET",
+            "description": "Reporte general de productos de crédito en un intervalo de fechas (Parte II).",
+            "url": {
+              "raw": "{{credit_url}}/reports/credits/products-summary?from=2026-01-01&to=2026-12-31",
+              "host": [
+                "{{credit_url}}"
+              ],
+              "path": [
+                "reports",
+                "credits",
+                "products-summary"
+              ],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "2026-01-01"
+                },
+                {
+                  "key": "to",
+                  "value": "2026-12-31"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "6.11 Report: Credit Card Last Movements",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{credit_url}}/reports/credit-card/{{creditCardId}}/last-movements",
+              "host": [
+                "{{credit_url}}"
+              ],
+              "path": [
+                "reports",
+                "credit-card",
+                "{{creditCardId}}",
+                "last-movements"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "7. Yanki Wallet (Kafka)",
+      "item": [
+        {
+          "name": "7.1 Register Wallet (Success - no bank customer required)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"documentNumber\": \"70123456\",\n  \"cellphone\": \"{{walletCellphone}}\",\n  \"imei\": \"IMEI-123456789\",\n  \"email\": \"yanki.user@mail.com\"\n}"
+            },
+            "url": {
+              "raw": "{{wallet_url}}/wallets",
+              "host": [
+                "{{wallet_url}}"
+              ],
+              "path": [
+                "wallets"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.collectionVariables.set(\"walletId\", json.id);",
+                  "pm.test(\"Status code es 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "7.2 Register Wallet with Duplicate Cellphone (Error 400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"documentNumber\": \"79999999\",\n  \"cellphone\": \"{{walletCellphone}}\",\n  \"imei\": \"IMEI-000000000\",\n  \"email\": \"otro@mail.com\"\n}"
+            },
+            "url": {
+              "raw": "{{wallet_url}}/wallets",
+              "host": [
+                "{{wallet_url}}"
+              ],
+              "path": [
+                "wallets"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "7.3 Get All Wallets",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{wallet_url}}/wallets",
+              "host": [
+                "{{wallet_url}}"
+              ],
+              "path": [
+                "wallets"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "7.4 Get Wallet By ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{wallet_url}}/wallets/{{walletId}}",
+              "host": [
+                "{{wallet_url}}"
+              ],
+              "path": [
+                "wallets",
+                "{{walletId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "7.5 Get Wallet By Cellphone",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{wallet_url}}/wallets/by-cellphone/{{walletCellphone}}",
+              "host": [
+                "{{wallet_url}}"
+              ],
+              "path": [
+                "wallets",
+                "by-cellphone",
+                "{{walletCellphone}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "7.6 Associate Debit Card to Wallet",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "description": "Asocia una tarjeta de débito del banco; habilita carga/retiro contra la cuenta principal.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"debitCardId\": \"{{debitCardId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{wallet_url}}/wallets/{{walletId}}/debit-card",
+              "host": [
+                "{{wallet_url}}"
+              ],
+              "path": [
+                "wallets",
+                "{{walletId}}",
+                "debit-card"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "7.7 Send Payment to Another Wallet (by cellphone)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "description": "Envía saldo a otro monedero usando solo su número de celular.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"targetCellphone\": \"{{targetWalletCellphone}}\",\n  \"amount\": 25.0\n}"
+            },
+            "url": {
+              "raw": "{{wallet_url}}/wallets/{{walletId}}/payments",
+              "host": [
+                "{{wallet_url}}"
+              ],
+              "path": [
+                "wallets",
+                "{{walletId}}",
+                "payments"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "7.8 Top-Up: Load Balance from Debit Card (Async 202)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "description": "Publica el comando en Kafka (wallet-operations); el saldo se actualiza al recibir el resultado (wallet-operation-results).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 100.0\n}"
+            },
+            "url": {
+              "raw": "{{wallet_url}}/wallets/{{walletId}}/top-up",
+              "host": [
+                "{{wallet_url}}"
+              ],
+              "path": [
+                "wallets",
+                "{{walletId}}",
+                "top-up"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 202\", function () {",
+                  "    pm.response.to.have.status(202);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "7.9 Withdraw: Credit Balance to Debit Card (Async 202)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "description": "Publica el comando en Kafka; el banco abona la cuenta y Yanki debita el monedero al recibir el resultado.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 50.0\n}"
+            },
+            "url": {
+              "raw": "{{wallet_url}}/wallets/{{walletId}}/withdraw",
+              "host": [
+                "{{wallet_url}}"
+              ],
+              "path": [
+                "wallets",
+                "{{walletId}}",
+                "withdraw"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 202\", function () {",
+                  "    pm.response.to.have.status(202);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "8. Update & Delete (CRUD restante)",
+      "description": "Operaciones Update/Delete de todas las entidades (CRUD completo). Se ejecutan al final para no alterar los recursos usados por las carpetas anteriores.",
+      "item": [
+        {
+          "name": "8.1 Update Customer (Success)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "url": {
+              "raw": "{{customer_url}}/customers/{{personalCustomerId}}",
+              "host": [
+                "{{customer_url}}"
+              ],
+              "path": [
+                "customers",
+                "{{personalCustomerId}}"
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Juan Perez Actualizado\",\n  \"documentNumber\": \"10203040\",\n  \"customerType\": \"PERSONAL\"\n}"
+            }
+          }
+        },
+        {
+          "name": "8.2 Update Bank Account (Success)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "url": {
+              "raw": "{{account_url}}/bank-accounts/{{savingsAccountId}}",
+              "host": [
+                "{{account_url}}"
+              ],
+              "path": [
+                "bank-accounts",
+                "{{savingsAccountId}}"
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerId\": \"{{personalCustomerId}}\",\n  \"accountType\": \"SAVINGS\",\n  \"balance\": 1500,\n  \"maintenanceFee\": 0,\n  \"maxMovements\": 10\n}"
+            }
+          }
+        },
+        {
+          "name": "8.3 Update Credit (Success)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "url": {
+              "raw": "{{credit_url}}/credits/{{personalCreditId}}",
+              "host": [
+                "{{credit_url}}"
+              ],
+              "path": [
+                "credits",
+                "{{personalCreditId}}"
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerId\": \"{{personalCustomerId}}\",\n  \"creditType\": \"PERSONAL_CREDIT\",\n  \"amount\": 5000,\n  \"balance\": 4000\n}"
+            }
+          }
+        },
+        {
+          "name": "8.4 Update Debit Card (Success)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "url": {
+              "raw": "{{account_url}}/debit-cards/{{debitCardId}}",
+              "host": [
+                "{{account_url}}"
+              ],
+              "path": [
+                "debit-cards",
+                "{{debitCardId}}"
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"accountId\": \"{{savingsAccountId}}\",\n  \"status\": \"BLOCKED\"\n}"
+            }
+          }
+        },
+        {
+          "name": "8.5 Delete Debit Card (Success)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 204\", function () {",
+                  "    pm.response.to.have.status(204);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{account_url}}/debit-cards/{{debitCardId}}",
+              "host": [
+                "{{account_url}}"
+              ],
+              "path": [
+                "debit-cards",
+                "{{debitCardId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "8.6 Delete Credit (Success)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 204\", function () {",
+                  "    pm.response.to.have.status(204);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{credit_url}}/credits/{{personalCreditId}}",
+              "host": [
+                "{{credit_url}}"
+              ],
+              "path": [
+                "credits",
+                "{{personalCreditId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "8.7 Delete Bank Account (Success)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 204\", function () {",
+                  "    pm.response.to.have.status(204);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{account_url}}/bank-accounts/{{savingsAccountId}}",
+              "host": [
+                "{{account_url}}"
+              ],
+              "path": [
+                "bank-accounts",
+                "{{savingsAccountId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "8.8 Delete Customer (Success)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 204\", function () {",
+                  "    pm.response.to.have.status(204);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{customer_url}}/customers/{{personalCustomerId}}",
+              "host": [
+                "{{customer_url}}"
+              ],
+              "path": [
+                "customers",
+                "{{personalCustomerId}}"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
